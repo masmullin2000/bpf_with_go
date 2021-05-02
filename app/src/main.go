@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target bpfel -cc clang gen_execve ./bpf/execve.bpf.c -- -I/usr/include/bpf -I.
+
 import (
 	"bytes"
 	"encoding/binary"
@@ -7,9 +9,7 @@ import (
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/perf"
 	"log"
-
 	"golang.org/x/sys/unix"
-
 	"os"
 )
 
@@ -18,13 +18,12 @@ type exec_data_t struct {
 	F_name [32]byte
 }
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target bpfel -cc clang gen_execve ./bpf/execve.bpf.c -- -I/usr/include/bpf -I.
-
 func setlimit() {
-	if err := unix.Setrlimit(unix.RLIMIT_MEMLOCK, &unix.Rlimit{
-		Cur: unix.RLIM_INFINITY,
-		Max: unix.RLIM_INFINITY,
-	}); err != nil {
+	if err := unix.Setrlimit(unix.RLIMIT_MEMLOCK,
+		&unix.Rlimit{
+			Cur: unix.RLIM_INFINITY,
+			Max: unix.RLIM_INFINITY,
+		}); err != nil {
 		log.Fatalf("failed to set temporary rlimit: %v", err)
 	}
 }
@@ -56,7 +55,8 @@ func main() {
 		b_arr := bytes.NewBuffer(ev.RawSample)
 
 		var data exec_data_t
-		if err := binary.Read(b_arr, binary.LittleEndian, &data); err != nil {
+		if err := binary.Read(b_arr, binary.LittleEndian,
+			&data); err != nil {
 			log.Printf("parsing perf event: %s", err)
 			continue
 		}

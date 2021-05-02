@@ -7,6 +7,7 @@ struct exec_data_t {
 	u8 fname[FNAME_LEN];
 };
 
+// For Rust libbpf-rs only
 struct exec_data_t _edt = {0};
 
 struct {
@@ -37,9 +38,11 @@ int enter_execve(struct execve_entry_args_t *args)
 
 	exec_data.pid = LAST_32_BITS(pid_tgid);
 
-	bpf_probe_read_user_str(exec_data.fname, sizeof(exec_data.fname), args->filename);
+	bpf_probe_read_user_str(exec_data.fname,
+		sizeof(exec_data.fname), args->filename);
 
-	bpf_perf_event_output(args, &events, BPF_F_CURRENT_CPU, &exec_data, sizeof(exec_data));
+	bpf_perf_event_output(args, &events,
+		BPF_F_CURRENT_CPU, &exec_data, sizeof(exec_data));
 
 	bpf_printk("hello, world\n");
 
