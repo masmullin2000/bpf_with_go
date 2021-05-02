@@ -5,6 +5,7 @@
 struct exec_data_t {
 	u32 pid;
 	u8 fname[FNAME_LEN];
+	u8 comm[FNAME_LEN];
 };
 
 // For Rust libbpf-rs only
@@ -35,11 +36,12 @@ int enter_execve(struct execve_entry_args_t *args)
 	u64 pid_tgid;
 
 	pid_tgid = bpf_get_current_pid_tgid();
-
 	exec_data.pid = LAST_32_BITS(pid_tgid);
 
 	bpf_probe_read_user_str(exec_data.fname,
 		sizeof(exec_data.fname), args->filename);
+
+	bpf_get_current_comm(exec_data.comm, sizeof(exec_data.comm));
 
 	bpf_perf_event_output(args, &events,
 		BPF_F_CURRENT_CPU, &exec_data, sizeof(exec_data));

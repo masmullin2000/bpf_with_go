@@ -8,6 +8,7 @@ build: vmlinux
 	docker create -it --name dummy $(APP) /bin/sh
 	docker cp dummy:$(APP) $(APP)
 	docker rm -f dummy
+	docker save $(APP) | gzip -9 > $(APP).tar.gz
 
 .PHONY: push
 push: build

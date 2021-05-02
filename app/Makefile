@@ -17,7 +17,7 @@ vmlinux: src/bpf/vmlinux.h
 sum: go.sum
 
 .PHONY: fmt
-fmt:
+fmt: sum
 	go fmt src/*.go
 
 .PHONY: clean

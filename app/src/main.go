@@ -8,14 +8,15 @@ import (
 	"fmt"
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/perf"
-	"log"
 	"golang.org/x/sys/unix"
+	"log"
 	"os"
 )
 
 type exec_data_t struct {
 	Pid    uint32
 	F_name [32]byte
+	Comm   [32]byte
 }
 
 func setlimit() {
@@ -55,12 +56,12 @@ func main() {
 		b_arr := bytes.NewBuffer(ev.RawSample)
 
 		var data exec_data_t
-		if err := binary.Read(b_arr, binary.LittleEndian,
-			&data); err != nil {
+		if err := binary.Read(b_arr, binary.LittleEndian, &data); err != nil {
 			log.Printf("parsing perf event: %s", err)
 			continue
 		}
 
-		fmt.Printf("cpu %02d ran : %d %s\n", ev.CPU, data.Pid, data.F_name)
+		fmt.Printf("On cpu %02d %s ran : %d %s\n",
+			ev.CPU, data.Comm, data.Pid, data.F_name)
 	}
 }
