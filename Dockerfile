@@ -1,5 +1,8 @@
-FROM almalinux/almalinux:latest as builder
-RUN dnf install clang go make libbpf-devel -y
+FROM almalinux:8.5 as builder
+RUN dnf install epel-release dnf-plugins-core -y
+#RUN dnf config-manager --enable epel -y
+#RUN dnf repolist 
+RUN dnf --enablerepo=powertools install clang go make libbpf-devel -y
 WORKDIR /
 COPY app .
 RUN make

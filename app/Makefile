@@ -36,7 +36,6 @@ src/bpf/vmlinux.h:
 
 src/gen_execve_bpfel.go: src/bpf/execve.bpf.c
 	go generate src/*.go
-	@rm src/*.o
 
 go.sum:
 	go mod download github.com/cilium/ebpf
